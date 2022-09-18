@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
-import items from './data'
+// import items from './data'
+import Client from './Contentful'
 
+// Client.getEntries().then((response)=>console.log(response.items)).catch(console.error)
 
 const RoomContext = React.createContext();
 
@@ -22,6 +24,33 @@ state = {
 
 };
 //  get data
+  getData = async () => {
+    try {
+      let response = await Client.getEntries({
+        content_type: "resortBeachRoom",
+        order: 'sys.createdAt'
+      });
+      let rooms = this.formatData(response.items);
+
+      let featuredRooms = rooms.filter(room => room.featured === true);
+      //
+      let maxPrice = Math.max(...rooms.map(item => item.price));
+      let maxSize = Math.max(...rooms.map(item => item.size));
+      this.setState({
+        rooms,
+        featuredRooms,
+        sortedRooms: rooms,
+        loading: false,
+        //
+        price: maxPrice,
+        maxPrice,
+        maxSize
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  
 
 getRoom = (slug)=>{
    let tempRooms = [...this.state.rooms];
@@ -34,21 +63,22 @@ getRoom = (slug)=>{
 
 
 componentDidMount(){
-    let rooms = this.formatData(items);
-    let featuredRooms = rooms.filter(room=> room.featured ===true);
-    let maxPrice = Math.max(...rooms.map(item=>item.price));
-    let maxSize = Math.max(...rooms.map(item=>item.size)); 
-    this.setState({
-      rooms, 
-      featuredRooms, 
-      sortedRooms:rooms, 
-      loading:false,
-      price:maxPrice,
-       maxSize,
-       maxPrice,
+  this.getData()
+    // let rooms = this.formatData(items);
+    // let featuredRooms = rooms.filter(room=> room.featured ===true);
+    // let maxPrice = Math.max(...rooms.map(item=>item.price));
+    // let maxSize = Math.max(...rooms.map(item=>item.size)); 
+    // this.setState({
+    //   rooms, 
+    //   featuredRooms, 
+    //   sortedRooms:rooms, 
+    //   loading:false,
+    //   price:maxPrice,
+    //    maxSize,
+    //    maxPrice,
 
 
-    })
+    // })
 
  }
 
